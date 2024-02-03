@@ -12,8 +12,9 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.db1.address=:8000"
+      # - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      # - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--accesslog.filePath=/logs/access.log"
       - "--providers.docker.network=traefik-net"
       - "--log.filePath=/logs/traefik.log" 
@@ -25,12 +26,13 @@ services:
       # The HTTP port
       - "80:80"
       - "443:443"
+      - "8000:8000"
       # The Web UI (enabled by --api.insecure=true)
       - "8080:8080"
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
-      - "./config/letsencrypt:/letsencrypt"
+      - "./configs/letsencrypt:/letsencrypt"
       - ./logs/:/logs/
     networks:
       - default

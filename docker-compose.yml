@@ -63,20 +63,13 @@ services:
         max-file: "10"
 
   postgress:
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=gc-node-${NETWORK}_default"      
-      - "traefik.http.routers.postgres-${NETWORK}.rule=Host(`postgres-${NETWORK}.${DOMAIN}`)"
-      - "traefik.http.services.postgres-${NETWORK}.loadbalancer.server.port=80"  
-      - "traefik.http.routers.postgres-${NETWORK}.tls.certresolver=myresolver"          
-      - "traefik.http.routers.postgres-${NETWORK}.tls=true"       
     image: postgres:16.1-bullseye
     hostname: postgress
     volumes:
       - postgresdb:/var/lib/postgresql/data
       - ./scripts/:/scripts/
-    ports:
-      - target: 5432
+    # ports:
+    #   - 5432:5432
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -93,6 +86,46 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
+
+  pgbouncer:    
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=koios-${NETWORK}_default"      
+      # - "traefik.tcp.routers.postgres-${NETWORK}.rule=HostSNI(`postgres-${NETWORK}.${DOMAIN}`)"
+      - "traefik.tcp.routers.postgres-${NETWORK}.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.postgres-${NETWORK}.entrypoints=db1"
+      # - "traefik.tcp.services.postgres-${NETWORK}.loadbalancer.server.port=6432"  
+      # - "traefik.tcp.routers.postgres-${NETWORK}.tls.certresolver=myresolver"          
+      # - "traefik.tcp.routers.postgres-${NETWORK}.tls=true"      
+    image: bitnami/pgbouncer
+    environment:
+      - POSTGRESQL_HOST=koios-${NETWORK}-postgress-1
+      # CREATE USER bounce LOGIN PASSWORD '1q2w3e4r';
+      ## GRANT CONNECT ON DATABASE koioslite TO bounce;
+      - POSTGRESQL_USERNAME=bounce
+      - POSTGRESQL_PASSWORD=1q2w3e4r
+      - POSTGRESQL_DATABASE=${POSTGRES_DB}
+    ports:
+      - "8000:6432"
+    volumes:
+      - ./configs/pgbouncer/conf:/bitnami/pgbouncer/conf/
+      - ./configs/pgbouncer/bitnami/userlist.txt:/bitnami/userlist.txt
+    depends_on:
+      - postgress
+
+
+  whoami:
+    # A container that exposes an API to show its IP address
+    image: traefik/whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=koios-${NETWORK}_default"      
+      - "traefik.http.routers.whoami-${NETWORK}.entrypoints=websecure"
+      - "traefik.http.routers.whoami-${NETWORK}.rule=Host(`whoami-${NETWORK}.${DOMAIN}`)"
+      - "traefik.http.services.whoami-${NETWORK}.loadbalancer.server.port=80"  
+      - "traefik.http.routers.whoami-${NETWORK}.tls.certresolver=myresolver"          
+      - "traefik.http.routers.whoami-${NETWORK}.tls=true" 
+
 
   # postgrest:
   #   image: postgrest/postgrest:v12.0.2
