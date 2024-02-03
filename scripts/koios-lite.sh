@@ -530,7 +530,7 @@ menu() {
                     clear
                     show_splash_screen
                     gum spin --spinner dot --spinner.bold --show-output --title.align center --title.bold --spinner.foreground 121 --title.foreground 121  --title "Koios Lite Starting services..." -- echo && docker compose -f "${KLITE_HOME}"/docker-compose.yml up -d
-                    ;;         
+                    ;;
                 "Docker Down")
                     # Logic for Docker Down
                     clear
