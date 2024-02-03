@@ -513,8 +513,10 @@ menu() {
               # Submenu for Docker
               Docker_choice=$(gum choose --height 15 --item.foreground 39 --cursor.foreground 121 \
                 "Docker Status" \
-                "Docker Up/Reload" \
-                "Docker Down" \
+                "Docker Up/Reload Preprod" \
+                "Docker Up/Reload Mainnet" \
+                "Docker Down Preprod" \
+                "Docker Down Mainnet" \
                 "$(gum style --foreground 208 "Back")")
 
               case "$Docker_choice" in
@@ -525,18 +527,30 @@ menu() {
                     docker_status
                     # gum style --border rounded --border-foreground 121 --padding "1" --margin "1" --foreground 121 "$(docker compose ps | awk '{print $4, $8}')"
                     ;;
-                "Docker Up/Reload")
+                "Docker Up/Reload Preprod")
                     # Logic for Docker Up
                     clear
                     show_splash_screen
-                    gum spin --spinner dot --spinner.bold --show-output --title.align center --title.bold --spinner.foreground 121 --title.foreground 121  --title "Koios Lite Starting services..." -- echo && docker compose -f "${KLITE_HOME}"/docker-compose.yml up -d
+                    gum spin --spinner dot --spinner.bold --show-output --title.align center --title.bold --spinner.foreground 121 --title.foreground 121  --title "Koios Lite Starting services..." -- echo && docker compose --env-file .env.preprod -p koios-preprod -f "${KLITE_HOME}"/docker-compose.yml up -d
                     ;;
-                "Docker Down")
+                "Docker Up/Reload Mainnet")
+                    # Logic for Docker Up
+                    clear
+                    show_splash_screen
+                    gum spin --spinner dot --spinner.bold --show-output --title.align center --title.bold --spinner.foreground 121 --title.foreground 121  --title "Koios Lite Starting services..." -- echo && docker compose --env-file .env.mainnet -p koios-mainnet -f "${KLITE_HOME}"/docker-compose.yml up -d
+                    ;;                    
+                "Docker Down Preprod")
                     # Logic for Docker Down
                     clear
                     show_splash_screen
-                    gum spin --spinner dot --spinner.bold --show-output --title.align center --title.bold --spinner.foreground 202 --title.foreground 202 --title "Koios Lite Stopping services..." -- echo && docker compose -f "${KLITE_HOME}"/docker-compose.yml down
+                    gum spin --spinner dot --spinner.bold --show-output --title.align center --title.bold --spinner.foreground 202 --title.foreground 202 --title "Koios Lite Stopping services..." -- echo && docker compose -p koios-preprod -f "${KLITE_HOME}"/docker-compose.yml down
                     ;;
+                "Docker Down Mainnet")
+                    # Logic for Docker Down
+                    clear
+                    show_splash_screen
+                    gum spin --spinner dot --spinner.bold --show-output --title.align center --title.bold --spinner.foreground 202 --title.foreground 202 --title "Koios Lite Stopping services..." -- echo && docker compose -p koios-mainnet -f "${KLITE_HOME}"/docker-compose.yml down
+                    ;;                    
                 "Back")
                     # Back to Main Menu
                     ;;

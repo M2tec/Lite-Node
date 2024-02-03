@@ -68,8 +68,8 @@ services:
     volumes:
       - postgresdb:/var/lib/postgresql/data
       - ./scripts/:/scripts/
-    # ports:
-    #   - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -145,27 +145,27 @@ services:
   #     API_URL: http://127.0.0.1:8050/
 
 
-  haproxy:
-    image: haproxy:2.9.0-bookworm
-    hostname: haproxy
-    depends_on:
-      - postgrest
-    volumes:
-      - ./configs/haproxy/:/usr/local/etc/haproxy/
-      - ./scripts/:/scripts/
-    ports:
-      - 8053:8053
-    healthcheck:
-      test: ["CMD-SHELL", "haproxy -c -- /usr/local/etc/haproxy/haproxy.cfg"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: on-failure
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
+  # haproxy:
+  #   image: haproxy:2.9.0-bookworm
+  #   hostname: haproxy
+  #   depends_on:
+  #     - postgrest
+  #   volumes:
+  #     - ./configs/haproxy/:/usr/local/etc/haproxy/
+  #     - ./scripts/:/scripts/
+  #   ports:
+  #     - 8053:8053
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "haproxy -c -- /usr/local/etc/haproxy/haproxy.cfg"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   restart: on-failure
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "200k"
+  #       max-file: "10"
 
   cron:
     build: .
